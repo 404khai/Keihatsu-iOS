@@ -9,9 +9,15 @@ import SwiftUI
 
 @main
 struct Keihatsu_iOSApp: App {
+    @StateObject private var appEnvironment = AppEnvironment()
+    @StateObject private var appRouter = AppRouter()
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            AppRootView()
+                .environmentObject(appEnvironment)
+                .environmentObject(appRouter)
+                .environment(\.keihatsuTheme, appEnvironment.theme)
         }
     }
 }
