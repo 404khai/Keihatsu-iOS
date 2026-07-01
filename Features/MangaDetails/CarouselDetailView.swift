@@ -138,7 +138,7 @@ struct CarouselDetailView: View {
                     
                     Button {
                     } label: {
-                        Image(systemName: "arrow.down.circle.fill")
+                        Image(systemName: "arrow.down.to.line")
                             .font(.title3.weight(.semibold))
                             .foregroundStyle(.white)
                             .frame(width: 52, height: 52)
@@ -317,7 +317,7 @@ struct CarouselDetailView: View {
 
                 Spacer()
 
-                Image(systemName: "arrow.down.circle")
+                Image(systemName: "arrow.down.to.line.circle")
                     .font(.title3.weight(.semibold))
                     .foregroundStyle(.secondary)
             }

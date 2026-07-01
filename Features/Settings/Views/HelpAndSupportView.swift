@@ -162,7 +162,9 @@ private struct SupportIcon: View {
             .font(.headline)
             .foregroundStyle(accent)
             .frame(width: 40, height: 40)
-            .background(accent.opacity(0.12), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+            // .background(accent.opacity(0.12), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .background(Color.black, in: .circle)
+            .glassEffect(.regular)
     }
 }
 
@@ -187,7 +189,7 @@ private struct SupportTopic: Identifiable {
             details: "If a source is unavailable, check the Plugins screen for enabled status, source warnings, and migration options before retrying search or chapter loading."
         ),
         SupportTopic(
-            icon: "book.open",
+            icon: "book",
             title: "Reader controls",
             summary: "Adjust reading direction, background, and screen behavior.",
             details: "Reader defaults live in Settings > Reader. These preferences are designed to apply to future reader sessions without changing the current chapter unexpectedly."

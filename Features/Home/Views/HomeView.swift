@@ -19,9 +19,9 @@ struct HomeView: View {
             UpdateSection(
                 title: "Today",
                 items: [
-                    UpdateEntry(item: images[4], chapterLine: "Chapter 132, 135...", trailingIcon: "arrow.down.circle"),
-                    UpdateEntry(item: images[10], chapterLine: "Chapter 110, 111...", trailingIcon: "arrow.down.circle"),
-                    UpdateEntry(item: images[9], chapterLine: "Chapter 57, 58...", trailingIcon: "arrow.down.circle")
+                    UpdateEntry(item: images[4], chapterLine: "Chapter 132, 135...", trailingIcon: "arrow.down.to.line.circle"),
+                    UpdateEntry(item: images[10], chapterLine: "Chapter 110, 111...", trailingIcon: "arrow.down.to.line.circle"),
+                    UpdateEntry(item: images[9], chapterLine: "Chapter 57, 58...", trailingIcon: "arrow.down.to.line.circle")
                 ]
             ),
             UpdateSection(

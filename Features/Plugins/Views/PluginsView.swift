@@ -12,22 +12,42 @@ struct PluginsView: View {
     @State private var selectedTab: PluginsTab = .sources
     @State private var searchText = ""
 
-    private let sourceItems: [PluginSource] = [
-        PluginSource(name: "Atsumaru", assetName: "atsumaru", subtitle: "EN • https://atsumaru.example", status: "Available now", isEnabled: true),
-        PluginSource(name: "BatCave", assetName: "batcave", subtitle: "EN • https://batcave.example", status: "Installed", isEnabled: true),
-        PluginSource(name: "MangaFire", assetName: "mangafire", subtitle: "EN • https://mangafire.example", status: "Available now", isEnabled: false),
-        PluginSource(name: "ManhuaTop", assetName: "manhuatop", subtitle: "EN • https://manhuatop.example", status: "Available now", isEnabled: true),
-        PluginSource(name: "WeebCentral", assetName: "weebcentral", subtitle: "EN • https://weebcentral.example", status: "Disabled", isEnabled: false)
+    @State private var plugins: [PluginSource] = [
+        PluginSource(name: "Atsumaru", assetName: "atsumaru", subtitle: "EN • https://atsumaru.example", status: "Installed", isEnabled: true, isPinned: true),
+        PluginSource(name: "BatCave", assetName: "batcave", subtitle: "EN • https://batcave.example", status: "Available now", isEnabled: false, isPinned: false),
+        PluginSource(name: "MangaFire", assetName: "mangafire", subtitle: "EN • https://mangafire.example", status: "Available now", isEnabled: false, isPinned: false),
+        PluginSource(name: "ManhuaTop", assetName: "manhuatop", subtitle: "EN • https://manhuatop.example", status: "Installed", isEnabled: true, isPinned: true),
+        PluginSource(name: "WeebCentral", assetName: "weebcentral", subtitle: "EN • https://weebcentral.example", status: "Installed", isEnabled: true, isPinned: true)
     ]
 
     private var filteredSourceItems: [PluginSource] {
-        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !query.isEmpty else { return sourceItems }
+        filteredAndSorted(plugins.filter(\.isEnabled))
+    }
 
-        return sourceItems.filter { item in
-            item.name.localizedCaseInsensitiveContains(query)
-            || item.subtitle.localizedCaseInsensitiveContains(query)
-            || item.status.localizedCaseInsensitiveContains(query)
+    private var filteredPluginItems: [PluginSource] {
+        filteredAndSorted(plugins)
+    }
+
+    private func filteredAndSorted(_ items: [PluginSource]) -> [PluginSource] {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let filteredItems: [PluginSource]
+
+        if query.isEmpty {
+            filteredItems = items
+        } else {
+            filteredItems = items.filter { item in
+                item.name.localizedCaseInsensitiveContains(query)
+                || item.subtitle.localizedCaseInsensitiveContains(query)
+                || item.status.localizedCaseInsensitiveContains(query)
+            }
+        }
+
+        return filteredItems.sorted { lhs, rhs in
+            if lhs.isPinned != rhs.isPinned {
+                return lhs.isPinned && !rhs.isPinned
+            }
+
+            return lhs.name < rhs.name
         }
     }
 
@@ -45,26 +65,20 @@ struct PluginsView: View {
                     switch selectedTab {
                     case .sources:
                         ForEach(filteredSourceItems) { item in
-                            PluginCard(item: item)
+                            if let index = plugins.firstIndex(where: { $0.id == item.id }) {
+                                PluginCard(item: $plugins[index])
+                            }
                         }
                     case .plugins:
-                        PluginPlaceholderCard(
-                            title: "Plugin Store",
-                            subtitle: "Browse community plugins and install them here."
-                        )
-                        PluginPlaceholderCard(
-                            title: "Recommended",
-                            subtitle: "Discover popular sources curated for your library."
-                        )
+                        ForEach(filteredPluginItems) { item in
+                            if let index = plugins.firstIndex(where: { $0.id == item.id }) {
+                                PluginCard(item: $plugins[index])
+                            }
+                        }
                     case .migrate:
-                        PluginPlaceholderCard(
-                            title: "Migrate Sources",
-                            subtitle: "Move your saved sources and settings between plugins."
-                        )
-                        PluginPlaceholderCard(
-                            title: "Sync History",
-                            subtitle: "Keep reading state consistent after migration."
-                        )
+                        ForEach(filteredPluginItems) { item in
+                            MigratePluginRow(item: item)
+                        }
                     }
                 }
             }
@@ -97,13 +111,7 @@ struct PluginsView: View {
 }
 
 private struct PluginCard: View {
-    let item: PluginSource
-    @State private var isEnabled: Bool
-
-    init(item: PluginSource) {
-        self.item = item
-        _isEnabled = State(initialValue: item.isEnabled)
-    }
+    @Binding var item: PluginSource
 
     var body: some View {
         HStack(spacing: 14) {
@@ -125,17 +133,22 @@ private struct PluginCard: View {
 
                 Text(item.status)
                     .font(.footnote.weight(.medium))
-                    .foregroundStyle(isEnabled ? .green : .secondary)
+                    .foregroundStyle(item.isEnabled ? .green : .secondary)
             }
 
             Spacer(minLength: 0)
 
             VStack(spacing: 14) {
-                Image(systemName: "pin")
-                    .font(.body)
-                    .foregroundStyle(.secondary)
+                Button {
+                    item.isPinned.toggle()
+                } label: {
+                    Image(systemName: item.isPinned ? "pin.fill" : "pin")
+                        .font(.body)
+                        .foregroundStyle(item.isPinned ? Color.accentColor : Color.secondary)
+                }
+                .buttonStyle(.plain)
 
-                Toggle("", isOn: $isEnabled)
+                Toggle("", isOn: $item.isEnabled)
                     .labelsHidden()
                     .tint(.accentColor)
             }
@@ -149,22 +162,41 @@ private struct PluginCard: View {
     }
 }
 
-private struct PluginPlaceholderCard: View {
-    let title: String
-    let subtitle: String
+private struct MigratePluginRow: View {
+    let item: PluginSource
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(title)
-                .font(.headline)
-                .foregroundStyle(.primary)
+        HStack(spacing: 14) {
+            Image(item.assetName)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 54, height: 54)
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
 
-            Text(subtitle)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(item.name)
+                    .font(.headline)
+                    .foregroundStyle(.primary)
+
+                Text(item.subtitle)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
+
+            Spacer(minLength: 0)
+
+            Button {
+            } label: {
+                Image(systemName: "arrow.up.arrow.down")
+                    .font(.title2.weight(.semibold))
+                    .frame(width: 44, height: 44)
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(.primary)
+            .glassEffect(.regular.interactive())
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(18)
+        .padding(16)
         .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: 22, style: .continuous)
@@ -188,12 +220,13 @@ private enum PluginsTab: CaseIterable {
 }
 
 private struct PluginSource: Identifiable {
-    let id = UUID()
+    let id: UUID = UUID()
     let name: String
     let assetName: String
     let subtitle: String
     let status: String
-    let isEnabled: Bool
+    var isEnabled: Bool
+    var isPinned: Bool
 }
 
 #Preview {

@@ -71,9 +71,19 @@ struct NotificationsSheetView: View {
                             .tint(notification.isRead ? .gray : accent)
                         }
                     }
+                    // .tint(.primary)
                 }
                 .listStyle(.plain)
                 .scrollContentBackground(.hidden)
+                .overlay {
+                    if filteredNotifications.isEmpty {
+                        ContentUnavailableView(
+                            "You're All Caught Up",
+                            systemImage: "bell.badge.slash",
+                            description: Text("No notifications to show right now.")
+                        )
+                    }
+                }
             }
             .background(Color(.systemGroupedBackground).ignoresSafeArea())
             .navigationTitle("Notifications")
@@ -93,6 +103,7 @@ struct NotificationsSheetView: View {
                         } else {
                             Image(systemName: "xmark")
                                 .font(.headline.weight(.semibold))
+                                .foregroundStyle(.primary)
                         }
                     }
                 }
@@ -135,6 +146,7 @@ struct NotificationsSheetView: View {
 }
 
 private struct NotificationRow: View {
+    @Environment(\.colorScheme) private var colorScheme
     let notification: KeihatsuNotification
     let isSelected: Bool
     let selectionMode: Bool
@@ -152,35 +164,9 @@ private struct NotificationRow: View {
                 .buttonStyle(.plain)
             }
 
-            Image(systemName: notification.icon)
-                .font(.headline)
-                .foregroundStyle(accent)
-                .frame(width: 42, height: 42)
-                .background(accent.opacity(0.12), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
+            leadingVisual
 
-            VStack(alignment: .leading, spacing: 5) {
-                HStack(spacing: 8) {
-                    Text(notification.title)
-                        .font(.headline)
-                        .foregroundStyle(.primary)
-                        .lineLimit(1)
-
-                    if !notification.isRead {
-                        Circle()
-                            .fill(accent)
-                            .frame(width: 7, height: 7)
-                    }
-                }
-
-                Text(notification.message)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(2)
-
-                Text(notification.time)
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
-            }
+            notificationContent
 
             Spacer(minLength: 0)
         }
@@ -193,6 +179,59 @@ private struct NotificationRow: View {
             RoundedRectangle(cornerRadius: 22, style: .continuous)
                 .stroke(isSelected ? accent.opacity(0.38) : Color(.separator).opacity(0.25), lineWidth: 1)
         }
+    }
+
+    @ViewBuilder
+    private var leadingVisual: some View {
+        if let imageName = notification.imageName {
+            Image(imageName)
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(width: 54, height: 72)
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        } else {
+            Image(systemName: notification.icon)
+                .font(.title3.weight(.semibold))
+                .symbolRenderingMode(.hierarchical)
+                .foregroundStyle(systemIconForeground)
+                .frame(width: 44, height: 44)
+                .background(systemIconBackground, in: Circle())
+                .glassEffect(.regular.interactive(), in: .circle)
+        }
+    }
+
+    private var notificationContent: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            HStack(spacing: 8) {
+                Text(notification.displayTitle)
+                    .font(.headline)
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
+
+                if !notification.isRead {
+                    Circle()
+                        .fill(accent)
+                        .frame(width: 7, height: 7)
+                }
+            }
+
+            Text(notification.displayMessage)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .lineLimit(2)
+
+            Text(notification.time)
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+        }
+    }
+
+    private var systemIconForeground: Color {
+        colorScheme == .dark ? notification.systemColor : (notification.usesDarkSystemSymbol ? .black : .white)
+    }
+
+    private var systemIconBackground: Color {
+        colorScheme == .dark ? .black : notification.systemColor
     }
 }
 
@@ -219,14 +258,32 @@ private struct KeihatsuNotification: Identifiable {
     let title: String
     let message: String
     let time: String
+    var imageName: String?
+    var mangaTitle: String?
+    var chapters: [String] = []
+    var systemColor: Color = Color(hex: "42D9F5")
+    var usesDarkSystemSymbol = false
     var isRead: Bool
 
+    var displayTitle: String {
+        guard !chapters.isEmpty else { return title }
+        return mangaTitle ?? "Manwha Name Not Available"
+        // return chapters.count == 1 ? "New Chapter" : "New Chapters"
+    }
+
+    var displayMessage: String {
+        guard !chapters.isEmpty else { return message }
+        let chapterLabel = chapters.count == 1 ? "chapter" : "chapters"
+        return "\(chapters.count) \(chapterLabel) • \(chapters.joined(separator: ", "))\(chapters.count > 2 ? "..." : "")"
+    }
+
     static let samples: [KeihatsuNotification] = [
-        KeihatsuNotification(tab: .updates, icon: "book.closed.fill", title: "New Chapter", message: "Ordeal Chapter 158 is ready in your library.", time: "2m ago", isRead: false),
-        KeihatsuNotification(tab: .updates, icon: "arrow.down.circle.fill", title: "Download Complete", message: "3 chapters from Latna Saga are available offline.", time: "18m ago", isRead: false),
-        KeihatsuNotification(tab: .system, icon: "icloud.fill", title: "Sync Queued", message: "Reading history will sync when your account session refreshes.", time: "1h ago", isRead: true),
-        KeihatsuNotification(tab: .system, icon: "puzzlepiece.extension.fill", title: "Source Warning", message: "MangaFire is responding slowly. Try again later if pages fail.", time: "3h ago", isRead: false),
-        KeihatsuNotification(tab: .updates, icon: "sparkles", title: "Trending Now", message: "The World After the Fall is climbing in your recommendations.", time: "Yesterday", isRead: true)
+        KeihatsuNotification(tab: .updates, icon: "book.closed.fill", title: "Ordeal", message: "", time: "2m ago", imageName: "Image5", mangaTitle: "Ordeal", chapters: ["Chapter 132", "145", "155"], isRead: false),
+        KeihatsuNotification(tab: .updates, icon: "book.closed.fill", title: "Latna Saga", message: "", time: "18m ago", imageName: "Image2", mangaTitle: "Latna Saga", chapters: ["Chapter 88"], isRead: false),
+        KeihatsuNotification(tab: .updates, icon: "book.closed.fill", title: "The World After the Fall", message: "", time: "Yesterday", imageName: "Image3", mangaTitle: "The World After the Fall", chapters: ["Chapter 71", "72", "73"], isRead: true),
+        KeihatsuNotification(tab: .system, icon: "arrow.down.to.line.compact", title: "Update Available", message: "A new Keihatsu build is ready with reader and plugin improvements.", time: "1h ago", systemColor: Color(hex: "8DE328"), usesDarkSystemSymbol: true, isRead: true),
+        KeihatsuNotification(tab: .system, icon: "arrow.trianglehead.2.clockwise.rotate.90.icloud.fill", title: "Sync Queued", message: "Reading history will sync when your account session refreshes.", time: "2h ago", systemColor: Color(hex: "42D9F5"), usesDarkSystemSymbol: true, isRead: true),
+        KeihatsuNotification(tab: .system, icon: "puzzlepiece.extension.fill", title: "Source Warning", message: "MangaFire is responding slowly. Try again later if pages fail.", time: "3h ago", systemColor: Color(hex: "FF7A3D"), isRead: false)
     ]
 }
 

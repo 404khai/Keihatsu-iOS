@@ -29,7 +29,7 @@ struct AccountSheetView: View {
 
                     AccountSheetGroup(background: cardBackground) {
                         AccountSheetRow(
-                            icon: "arrow.down.circle",
+                            icon: "icloud.and.arrow.down",
                             title: "Download Queue",
                             showsChevron: true
                         )
@@ -140,7 +140,6 @@ struct AccountSheetView: View {
                 .scaledToFill()
                 .frame(width: 96, height: 96)
                 .clipShape(Circle())
-                .shadow(color: accent.opacity(0.24), radius: 18, y: 8)
                 .overlay {
                     Circle()
                         .stroke(.primary.opacity(colorScheme == .dark ? 0.14 : 0.08), lineWidth: 1)

@@ -11,7 +11,7 @@ struct SettingsView: View {
         SettingsSection(icon: "paintpalette", iconColor: Color(hex: "FF6EA8"), title: "Appearance", subtitle: "Themes, dark mode, display", destination: .appearance),
         SettingsSection(icon: "books.vertical", iconColor: Color(hex: "8DE328"), usesDarkSymbol: true, title: "Library", subtitle: "Categories, global updates, badges", destination: .library),
         SettingsSection(icon: "book", iconColor: Color(hex: "A98BFF"), title: "Reader", subtitle: "Reading mode, display, navigation", destination: .reader),
-        SettingsSection(icon: "arrow.down.circle", iconColor: Color(hex: "42D9F5"), usesDarkSymbol: true, title: "Downloads", subtitle: "Download behavior and offline chapters", destination: .downloads),
+        SettingsSection(icon: "arrow.down.to.line.compact", iconColor: Color(hex: "42D9F5"), usesDarkSymbol: true, title: "Downloads", subtitle: "Download behavior and offline chapters", destination: .downloads),
         SettingsSection(icon: "safari", iconColor: Color(hex: "5AA7FF"), title: "Browse", subtitle: "Extensions, global search, source hints", destination: .browse),
         SettingsSection(icon: "arrow.triangle.2.circlepath", iconColor: Color(hex: "FF7A3D"), title: "Tracking", subtitle: "Sync with external reading services", destination: .tracking),
         SettingsSection(icon: "shield.checkered", iconColor: Color(hex: "FFD166"), usesDarkSymbol: true, title: "Privacy", subtitle: "History, incognito mode, visibility", destination: .privacy),
@@ -88,7 +88,7 @@ struct AppearanceSettingsView: View {
                     SettingsDivider()
 
                     SettingsPickerRow(
-                        icon: "app.dashed",
+                        icon: "app.background.dotted",
                         title: "App Icon",
                         subtitle: "Choose the launcher identity",
                         selection: $preferencesStore.preferences.appIcon,
@@ -663,7 +663,7 @@ private struct SettingsIcon: View {
             .foregroundStyle(foregroundColor)
             .frame(width: 40, height: 40)
             .background(backgroundColor, in: .circle)
-            .glassEffect(.regular.interactive())
+            .glassEffect(.regular)
     }
 
     private var foregroundColor: Color {

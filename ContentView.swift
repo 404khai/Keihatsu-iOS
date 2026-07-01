@@ -18,7 +18,6 @@ struct ContentView: View {
     @EnvironmentObject private var preferencesStore: AppPreferencesStore
     @Namespace private var animation
     @State private var expandMiniPlayer: Bool = false
-    @State private var searchText: String = ""
     
     var body: some View {
         Group {
@@ -102,11 +101,7 @@ struct ContentView: View {
             
             Tab.init("Search", systemImage: "magnifyingglass", role: .search){
                 NavigationStack {
-                    List{
-                        
-                    }
-                    .navigationTitle("Search")
-                    .searchable( text: $searchText, placement: .toolbar, prompt: Text("Search..."))
+                    GlobalExtensionSearchView()
                 }
             }
             
