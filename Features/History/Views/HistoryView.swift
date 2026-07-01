@@ -5,11 +5,29 @@ struct HistoryView: View {
     @State private var selectionMode: Bool = false
     @State private var selectedItemIDs: Set<UUID> = []
     @State private var deletePrompt: DeletePrompt?
+    @State private var searchText = ""
+
+    private var filteredSections: [HistorySection] {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return sections }
+
+        return sections.compactMap { section in
+            let items = section.items.filter { item in
+                item.title.localizedCaseInsensitiveContains(query)
+                || item.chapter.localizedCaseInsensitiveContains(query)
+                || item.time.localizedCaseInsensitiveContains(query)
+                || section.date.localizedCaseInsensitiveContains(query)
+            }
+
+            guard !items.isEmpty else { return nil }
+            return HistorySection(id: section.id, date: section.date, items: items)
+        }
+    }
 
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 28) {
-                ForEach(sections) { section in
+                ForEach(filteredSections) { section in
                     VStack(alignment: .leading, spacing: 18) {
                         Text(section.date)
                             .font(.title3.weight(.medium))
@@ -45,6 +63,16 @@ struct HistoryView: View {
             .padding(.vertical, 16)
         }
         .navigationTitle("History")
+        .searchable(text: $searchText, placement: .toolbar, prompt: Text("Search history"))
+        .overlay {
+            if filteredSections.isEmpty {
+                ContentUnavailableView(
+                    "No History Found",
+                    systemImage: "clock.badge.questionmark",
+                    description: Text("Try searching another title, chapter, date, or time.")
+                )
+            }
+        }
         .toolbar {
             if selectionMode {
                 ToolbarItem(placement: .topBarLeading) {

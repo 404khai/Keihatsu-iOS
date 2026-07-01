@@ -36,7 +36,7 @@ struct Keihatsu_iOSApp: App {
                 .environmentObject(syncQueueStore)
                 .environment(\.keihatsuTheme, KeihatsuTheme.default)
                 .preferredColorScheme(preferredColorScheme)
-                .tint(.keihatsuAccent)
+                .tint(Color(hex: preferencesStore.preferences.theme.hex))
         }
     }
 

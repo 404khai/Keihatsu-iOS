@@ -10,6 +10,7 @@ import SwiftUI
 struct HomeView: View {
     let animation: Namespace.ID
     @State private var showMenu: Bool = false
+    @State private var showNotifications: Bool = false
     @State private var activeID: UUID?
     @State private var selectedType: CarouselType = .type3
 
@@ -32,7 +33,7 @@ struct HomeView: View {
             )
         ]
     }
-    
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -140,8 +141,9 @@ struct HomeView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Notifications", systemImage: "bell.fill") {
-                        
+                        showNotifications.toggle()
                     }
+                    .matchedTransitionSource(id: "Notifications", in: animation)
                 }
                 
                 ToolbarItem(placement: .topBarTrailing) {
@@ -154,6 +156,10 @@ struct HomeView: View {
             .sheet(isPresented: $showMenu) {
                 AccountSheetView()
                     .navigationTransition(.zoom(sourceID: "Account", in: animation))
+            }
+            .sheet(isPresented: $showNotifications) {
+                NotificationsSheetView()
+                    .navigationTransition(.zoom(sourceID: "Notifications", in: animation))
             }
             .navigationDestination(for: ImageModel.self) { item in
                 CarouselDetailView(item: item, animation: animation)

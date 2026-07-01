@@ -10,6 +10,7 @@ import SwiftUI
 
 struct PluginsView: View {
     @State private var selectedTab: PluginsTab = .sources
+    @State private var searchText = ""
 
     private let sourceItems: [PluginSource] = [
         PluginSource(name: "Atsumaru", assetName: "atsumaru", subtitle: "EN • https://atsumaru.example", status: "Available now", isEnabled: true),
@@ -18,6 +19,17 @@ struct PluginsView: View {
         PluginSource(name: "ManhuaTop", assetName: "manhuatop", subtitle: "EN • https://manhuatop.example", status: "Available now", isEnabled: true),
         PluginSource(name: "WeebCentral", assetName: "weebcentral", subtitle: "EN • https://weebcentral.example", status: "Disabled", isEnabled: false)
     ]
+
+    private var filteredSourceItems: [PluginSource] {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return sourceItems }
+
+        return sourceItems.filter { item in
+            item.name.localizedCaseInsensitiveContains(query)
+            || item.subtitle.localizedCaseInsensitiveContains(query)
+            || item.status.localizedCaseInsensitiveContains(query)
+        }
+    }
 
     var body: some View {
         ScrollView {
@@ -32,7 +44,7 @@ struct PluginsView: View {
                 VStack(spacing: 14) {
                     switch selectedTab {
                     case .sources:
-                        ForEach(sourceItems) { item in
+                        ForEach(filteredSourceItems) { item in
                             PluginCard(item: item)
                         }
                     case .plugins:
@@ -63,6 +75,7 @@ struct PluginsView: View {
         .background(Color(.systemGroupedBackground).ignoresSafeArea())
         .navigationTitle("Plugins")
         .navigationBarTitleDisplayMode(.automatic)
+        .searchable(text: $searchText, placement: .toolbar, prompt: Text("Search plugins"))
 //        .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
 //        .toolbarColorScheme(.dark, for: .navigationBar)
         .toolbar {

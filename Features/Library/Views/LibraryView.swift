@@ -3,6 +3,7 @@ import SwiftUI
 struct LibraryView: View {
     let animation: Namespace.ID
     @State private var selectedCategory: LibraryCategory = .defaultCategory
+    @State private var searchText = ""
 
     private let itemsByCategory: [LibraryCategory: [ImageModel]] = [
         .defaultCategory: [
@@ -26,7 +27,15 @@ struct LibraryView: View {
     ]
 
     private var currentItems: [ImageModel] {
-        itemsByCategory[selectedCategory] ?? []
+        let items = itemsByCategory[selectedCategory] ?? []
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return items }
+
+        return items.filter { item in
+            item.title.localizedCaseInsensitiveContains(query)
+            || item.category.localizedCaseInsensitiveContains(query)
+            || item.metadataLine.localizedCaseInsensitiveContains(query)
+        }
     }
 
     var body: some View {
@@ -57,6 +66,7 @@ struct LibraryView: View {
             .padding(.vertical, 16)
         }
         .navigationTitle("Library")
+        .searchable(text: $searchText, placement: .toolbar, prompt: Text("Search library"))
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {

@@ -1,11 +1,26 @@
 {
   "fill" : {
-    "automatic-gradient" : "display-p3:0.89962,0.96783,0.81780,1.00000"
+    "linear-gradient" : [
+      "display-p3:0.45455,0.64494,0.00000,1.00000",
+      "display-p3:0.31878,0.50000,0.32580,1.00000"
+    ],
+    "orientation" : {
+      "start" : {
+        "x" : 0.5,
+        "y" : 0
+      },
+      "stop" : {
+        "x" : 0.5,
+        "y" : 0.7
+      }
+    }
   },
   "groups" : [
     {
       "layers" : [
         {
+          "blend-mode" : "normal",
+          "fill" : "automatic",
           "image-name" : "logo.png",
           "name" : "logo",
           "position" : {

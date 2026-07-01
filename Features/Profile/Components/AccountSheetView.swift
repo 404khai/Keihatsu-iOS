@@ -16,10 +16,14 @@ struct AccountSheetView: View {
             : Color(.secondarySystemGroupedBackground)
     }
 
+    private var accent: Color {
+        Color(hex: preferencesStore.preferences.theme.hex)
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 22) {
+                VStack(alignment: .leading, spacing: 24) {
                     profileHeader
                     statsCard
 
@@ -30,6 +34,7 @@ struct AccountSheetView: View {
                             showsChevron: true
                         )
                     }
+                    .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
 
                     AccountSheetGroup(background: cardBackground) {
                         NavigationLink {
@@ -45,11 +50,21 @@ struct AccountSheetView: View {
                     }
 
                     AccountSheetGroup(background: cardBackground) {
-                        AccountSheetRow(icon: "questionmark.circle", title: "Help & Support", showsChevron: true)
+                        NavigationLink {
+                            HelpAndSupportView()
+                        } label: {
+                            AccountSheetRow(icon: "questionmark.circle", title: "Help & Support", showsChevron: true)
+                        }
+                        .buttonStyle(.plain)
                         accountDivider
                         AccountSheetRow(icon: "gift", title: "Donate", showsChevron: true)
                         accountDivider
-                        AccountSheetRow(icon: "info.circle", title: "About", showsChevron: true)
+                        NavigationLink {
+                            AboutView()
+                        } label: {
+                            AccountSheetRow(icon: "info.circle", title: "About", showsChevron: true)
+                        }
+                        .buttonStyle(.plain)
                     }
 
                     AccountSheetGroup(background: cardBackground) {
@@ -71,7 +86,7 @@ struct AccountSheetView: View {
 
                             Toggle("Incognito Mode", isOn: $preferencesStore.preferences.incognitoModeEnabled)
                                 .labelsHidden()
-                                .tint(.keihatsuAccent)
+                                .tint(accent)
                         }
                         .padding(.horizontal, 18)
                         .padding(.vertical, 18)
@@ -88,7 +103,6 @@ struct AccountSheetView: View {
             .navigationBarTitleDisplayMode(.inline)
             .preferredColorScheme(incognitoModeEnabled ? .dark : nil)
             .onAppear {
-                preferencesStore.preferences.colorScheme = colorScheme == .dark ? .dark : .light
                 incognitoModeEnabled = preferencesStore.preferences.incognitoModeEnabled
             }
             .onChange(of: preferencesStore.preferences.incognitoModeEnabled) { _, newValue in
@@ -101,7 +115,8 @@ struct AccountSheetView: View {
     private var accountDivider: some View {
         Divider()
             .overlay(Color(.separator).opacity(incognitoModeEnabled ? 0.25 : 0.5))
-            .padding(.leading, 74)
+            .padding(.leading, 18)
+            .padding(.trailing, 18)
     }
 
     private var logoutButton: some View {
@@ -119,63 +134,70 @@ struct AccountSheetView: View {
     }
 
     private var profileHeader: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(spacing: 16) {
             Image("user1")
                 .resizable()
                 .scaledToFill()
-                .frame(width: 116, height: 116)
-                .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+                .frame(width: 96, height: 96)
+                .clipShape(Circle())
+                .shadow(color: accent.opacity(0.24), radius: 18, y: 8)
                 .overlay {
-                    RoundedRectangle(cornerRadius: 28, style: .continuous)
+                    Circle()
                         .stroke(.primary.opacity(colorScheme == .dark ? 0.14 : 0.08), lineWidth: 1)
                 }
 
-            HStack(alignment: .top, spacing: 16) {
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack(spacing: 32) {
-                        HStack(spacing: 8){
-                            Text("Kaizel")
-                                .font(.system(size: 40, weight: .bold, design: .rounded))
-                                .foregroundStyle(.primary)
+            VStack(spacing: 8) {
+                HStack(spacing: 8){
+                    Text("Kaizel")
+                        .font(.system(size: 36, weight: .bold, design: .rounded))
+                        .foregroundStyle(.primary)
 
-                            Image(systemName: "hammer.circle.fill")
-                                .font(.title3)
-                                .foregroundStyle(Color.keihatsuAccent)
-                        }
-                        
-                        Image(systemName: "pencil")
-                            .font(.title3)
-                            .foregroundStyle(.secondary)
-                    }
-
-                    Text("El Endministrator, Creator of Keihatsu")
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(2)
-
-                    HStack(spacing: 18) {
-                        Label("Member since 2025", systemImage: "calendar")
-                        Label("Switzerland", systemImage: "mappin.and.ellipse")
-                    }
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
+                    Image(systemName: "hammer.circle.fill")
+                        .font(.title3)
+                        .foregroundStyle(accent)
                 }
 
-                Spacer(minLength: 0)
+                Text("El Endministrator, Creator of Keihatsu")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.center)
+
+                HStack(spacing: 18) {
+                    Label("Member since 2025", systemImage: "calendar")
+                    Label("Switzerland", systemImage: "mappin.and.ellipse")
+                }
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+            }
+            .frame(maxWidth: .infinity)
+
+            HStack(spacing: 16) {
+                Button {
+                } label: {
+                    Label("Share Profile", systemImage: "square.and.arrow.up")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 48)
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(.primary)
+                .glassEffect(.regular.interactive())
 
                 Button {
                 } label: {
-                    Image(systemName: "square.and.arrow.up")
-                        .font(.title2.weight(.regular))
-                        .frame(width: 50, height: 50)
+                    Image(systemName: "pencil")
+                        .font(.headline)
+                        .frame(width: 48, height: 48)
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(.primary)
                 .glassEffect(.regular.interactive())
             }
         }
+        .frame(maxWidth: .infinity)
     }
 
     private var statsCard: some View {
@@ -198,7 +220,7 @@ private struct AccountSheetGroup<Content: View>: View {
         VStack(spacing: 0) {
             content
         }
-        .background(background, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .background(background, in: RoundedRectangle(cornerRadius: 26, style: .continuous))
     }
 }
 

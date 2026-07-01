@@ -2,6 +2,7 @@ import Foundation
 
 struct LocalUserPreferences: Codable, Equatable {
     var accentHex: String
+    var theme: KeihatsuThemePreference
     var appIcon: AppIconPreference
     var colorScheme: AppColorSchemePreference
     var readerDirection: ReaderDirectionPreference
@@ -19,6 +20,7 @@ struct LocalUserPreferences: Codable, Equatable {
 
     init(
         accentHex: String,
+        theme: KeihatsuThemePreference,
         appIcon: AppIconPreference,
         colorScheme: AppColorSchemePreference,
         readerDirection: ReaderDirectionPreference,
@@ -35,6 +37,7 @@ struct LocalUserPreferences: Codable, Equatable {
         diagnosticsEnabled: Bool
     ) {
         self.accentHex = accentHex
+        self.theme = theme
         self.appIcon = appIcon
         self.colorScheme = colorScheme
         self.readerDirection = readerDirection
@@ -56,6 +59,7 @@ struct LocalUserPreferences: Codable, Equatable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         accentHex = try container.decodeIfPresent(String.self, forKey: .accentHex) ?? defaults.accentHex
+        theme = try container.decodeIfPresent(KeihatsuThemePreference.self, forKey: .theme) ?? defaults.theme
         appIcon = try container.decodeIfPresent(AppIconPreference.self, forKey: .appIcon) ?? defaults.appIcon
         colorScheme = try container.decodeIfPresent(AppColorSchemePreference.self, forKey: .colorScheme) ?? defaults.colorScheme
         readerDirection = try container.decodeIfPresent(ReaderDirectionPreference.self, forKey: .readerDirection) ?? defaults.readerDirection
@@ -74,6 +78,7 @@ struct LocalUserPreferences: Codable, Equatable {
 
     static let `default` = LocalUserPreferences(
         accentHex: "92BB57",
+        theme: .verdant,
         appIcon: .default,
         colorScheme: .system,
         readerDirection: .vertical,
@@ -89,6 +94,46 @@ struct LocalUserPreferences: Codable, Equatable {
         trackingSyncEnabled: false,
         diagnosticsEnabled: false
     )
+}
+
+enum KeihatsuThemePreference: String, Codable, CaseIterable, Identifiable {
+    case verdant
+    case moonlit
+    case sakuraPulse
+    case emberScript
+    case oceanFrame
+
+    var id: String { rawValue }
+
+    var label: String {
+        switch self {
+        case .verdant: return "Verdant"
+        case .moonlit: return "Moonlit"
+        case .sakuraPulse: return "Sakura Pulse"
+        case .emberScript: return "Ember Script"
+        case .oceanFrame: return "Ocean Frame"
+        }
+    }
+
+    var subtitle: String {
+        switch self {
+        case .verdant: return "Keihatsu green for actions and active icons"
+        case .moonlit: return "Soft violet for night reading"
+        case .sakuraPulse: return "Warm pink with a lively highlight"
+        case .emberScript: return "Orange-red for dramatic panels"
+        case .oceanFrame: return "Cool cyan for a calmer library"
+        }
+    }
+
+    var hex: String {
+        switch self {
+        case .verdant: return "8DE328"
+        case .moonlit: return "A98BFF"
+        case .sakuraPulse: return "FF6EA8"
+        case .emberScript: return "FF7A3D"
+        case .oceanFrame: return "42D9F5"
+        }
+    }
 }
 
 enum AppIconPreference: String, Codable, CaseIterable, Identifiable {
