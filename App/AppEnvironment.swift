@@ -5,13 +5,19 @@ import Foundation
 final class AppEnvironment: ObservableObject {
     let services: AppServices
     let theme: KeihatsuTheme
+    let preferencesStore: AppPreferencesStore
+    let syncQueueStore: SyncQueueStore
 
     init(
         services: AppServices = .preview,
-        theme: KeihatsuTheme? = nil
+        theme: KeihatsuTheme? = nil,
+        preferencesStore: AppPreferencesStore? = nil,
+        syncQueueStore: SyncQueueStore? = nil
     ) {
         self.services = services
         self.theme = theme ?? .default
+        self.preferencesStore = preferencesStore ?? AppPreferencesStore()
+        self.syncQueueStore = syncQueueStore ?? SyncQueueStore()
     }
 }
 
